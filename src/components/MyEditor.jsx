@@ -2,24 +2,32 @@ import { Editor } from "@tinymce/tinymce-react";
 import DOMPurify from "dompurify";
 import React from "react";
 
+const API = import.meta.env.VITE_TinyMCE_API;
 const MyEditor = () => {
+  
+  // the function change event check  
   const handleEditorChange = (content) => {
-    console.log("content was updated", content);
+    // console.log("content was updated", content);
   };
 
+  // the function tag formatting
   const handleSanitizeWithFormatting = (content) => {
     return DOMPurify.sanitize(content, {
       ALLOWED_TAGS: ["b", "strong", "i", "em", "ul", "li", "ol"],
       ALLOWED_ATTR: [],
     });
   };
+
+  //the function for clean content
   const handleCleanContent = (content) => {
     return DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   };
   return (
     <div>
       <Editor
-        apiKey={import.meta.env.VITE_TinyMCE_API}
+      
+      //the add api for .env file
+        apiKey={API}
         init={{
           height: 600,
           menubar: false,
@@ -54,6 +62,7 @@ const MyEditor = () => {
           paste_preprocess: function (plugins, args) {
             const content = args.content;
 
+            //check the fragment
             if (content.includes("<!--StartFragment-->")) {
               alert("the content form MS Office/Google Docs Detected");
               const keepFormatting = window.confirm(
@@ -63,6 +72,8 @@ const MyEditor = () => {
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
               }
+
+              //check the data:image 
             } else if (content.includes("data:image/")) {
               alert("content from google docs detected");
               const keepFormatting = window.confirm(
@@ -72,6 +83,8 @@ const MyEditor = () => {
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
               }
+
+              //check the excel file content
             } else if (
               content.includes("<table") &&
               content.includes("mso-cellspacing")
@@ -84,6 +97,8 @@ const MyEditor = () => {
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
               }
+
+            // the basic formatting
             } else {
               const keepFormatting = window.confirm(
                 "Do you want basic formatting?"
