@@ -6,12 +6,12 @@ const MyEditor = () => {
     console.log("content was updated", content);
   };
   const handleCleanContent = (content) => {
-    return content.replace(/<[^>]+>/g, "");
+    return content.replace(/<[^>]+>?/gm,'');
   };
   return (
     <div>
       <Editor
-        apiKey="q4usclgkum083qklupf4bu6gqik29bsod3y8h5zqsdlzu2m4"
+        apiKey={import.meta.env.VITE_TinyMCE_API}
         init={{
           height: 500,
           menubar: false,
@@ -55,8 +55,34 @@ const MyEditor = () => {
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
               }
-            }else if (content.includes('data:image/') || content.includes('docs-internal-guide')){
-                
+            } else if (
+              content.includes("data:image/") ||
+              content.includes("docs-internal-guide")
+            ) {
+              alert(
+                "content from google docs detected. Do you want to keep formatting?"
+              );
+              const keepFormatting = window.confirm(
+                "Do You want to keep the formation?"
+              );
+
+              if (!keepFormatting) {
+                args.content = handleCleanContent(content);
+              }
+            } else if (
+              content.includes("<table") &&
+              content.includes("mso-cellspacing")
+            ) {
+              alert(
+                "content from Excel detected. Do you want to keep formatting"
+              );
+              const keepFormatting = window.confirm(
+                "Do You want to keep the formation?"
+              );
+
+              if (!keepFormatting) {
+                args.content = handleCleanContent(content);
+              }
             }
           },
           paste_postprocess: function (plugins, args) {
