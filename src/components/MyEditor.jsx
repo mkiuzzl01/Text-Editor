@@ -1,19 +1,27 @@
 import { Editor } from "@tinymce/tinymce-react";
+import DOMPurify from "dompurify";
 import React from "react";
 
 const MyEditor = () => {
-  const handleEditorChange = (content, editor) => {
+  const handleEditorChange = (content) => {
     console.log("content was updated", content);
   };
+
+  const handleSanitizeWithFormatting = (content) => {
+    return DOMPurify.sanitize(content, {
+      ALLOWED_TAGS: ["b", "strong", "i", "em", "ul", "li", "ol"],
+      ALLOWED_ATTR: [],
+    });
+  };
   const handleCleanContent = (content) => {
-    return content.replace(/<[^>]+>?/gm,'');
+    return DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
   };
   return (
     <div>
       <Editor
         apiKey={import.meta.env.VITE_TinyMCE_API}
         init={{
-          height: 500,
+          height: 700,
           menubar: false,
           plugins: [
             "advlist",
@@ -36,7 +44,7 @@ const MyEditor = () => {
             "wordcount",
           ],
           toolbar:
-            "undo redo | blocks | " +
+            "undo redo | formatselect | " +
             "bold italic forecolor | alignleft aligncenter " +
             "alignright alignjustify | bullist numlist outdent indent | " +
             "removeformat | help",
@@ -55,13 +63,8 @@ const MyEditor = () => {
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
               }
-            } else if (
-              content.includes("data:image/") ||
-              content.includes("docs-internal-guide")
-            ) {
-              alert(
-                "content from google docs detected. Do you want to keep formatting?"
-              );
+            } else if (content.includes("data:image/")) {
+              alert("content from google docs detected");
               const keepFormatting = window.confirm(
                 "Do You want to keep the formation?"
               );
@@ -73,15 +76,20 @@ const MyEditor = () => {
               content.includes("<table") &&
               content.includes("mso-cellspacing")
             ) {
-              alert(
-                "content from Excel detected. Do you want to keep formatting"
-              );
+              alert("content from Excel detected");
               const keepFormatting = window.confirm(
                 "Do You want to keep the formation?"
               );
 
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
+              }
+            } else {
+              const keepFormatting = window.confirm(
+                "Do you want basic formatting?"
+              );
+              if (!keepFormatting) {
+                args.content = handleSanitizeWithFormatting(content);
               }
             }
           },
