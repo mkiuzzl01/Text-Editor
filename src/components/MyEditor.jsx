@@ -21,7 +21,7 @@ const MyEditor = () => {
       <Editor
         apiKey={import.meta.env.VITE_TinyMCE_API}
         init={{
-          height: 700,
+          height: 600,
           menubar: false,
           plugins: [
             "advlist",
@@ -44,7 +44,7 @@ const MyEditor = () => {
             "wordcount",
           ],
           toolbar:
-            "undo redo | formatselect | " +
+            "undo redo | formatselect | blocks |" +
             "bold italic forecolor | alignleft aligncenter " +
             "alignright alignjustify | bullist numlist outdent indent | " +
             "removeformat | help",
