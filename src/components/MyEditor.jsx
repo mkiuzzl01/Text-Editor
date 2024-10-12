@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 import React from "react";
 
 const API = import.meta.env.VITE_TinyMCE_API;
+
 const MyEditor = () => {
   
   // the function change event check  
@@ -25,7 +26,7 @@ const MyEditor = () => {
   return (
     <div>
       <Editor
-      
+
       //the add api for .env file
         apiKey={API}
         init={{
@@ -94,6 +95,7 @@ const MyEditor = () => {
                 "Do You want to keep the formation?"
               );
 
+              //the handle clean function
               if (!keepFormatting) {
                 args.content = handleCleanContent(content);
               }
