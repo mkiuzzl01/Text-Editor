@@ -2,8 +2,6 @@ import { Editor } from "@tinymce/tinymce-react";
 import DOMPurify from "dompurify";
 import React from "react";
 
-const API = import.meta.env.VITE_TinyMCE_API;
-
 const MyEditor = () => {
   
   // the function change event check  
@@ -28,7 +26,7 @@ const MyEditor = () => {
       <Editor
 
       //the add api for .env file
-        apiKey={API}
+        apiKey={import.meta.env.VITE_TinyMCE_API}
         init={{
           height: 600,
           menubar: false,
@@ -59,6 +57,7 @@ const MyEditor = () => {
             "removeformat | help",
 
           paste_data_images: true,
+          statusbar:false,
 
           paste_preprocess: function (plugins, args) {
             const content = args.content;
