@@ -1,36 +1,43 @@
 import { Editor } from "@tinymce/tinymce-react";
-import DOMPurify from "dompurify";
-import React from "react";
+import React, { useState } from "react";
 
 const MyEditor = () => {
-  
-  // the function change event check  
-  const handleEditorChange = (content) => {
-    // console.log("content was updated", content);
-  };
-
-  // the function tag formatting
-  const handleSanitizeWithFormatting = (content) => {
-    return DOMPurify.sanitize(content, {
-      ALLOWED_TAGS: ["b", "strong", "i", "em", "ul", "li", "ol"],
-      ALLOWED_ATTR: [],
-    });
-  };
+  const [content, setContent] = useState("");
 
   //the function for clean content
-  const handleCleanContent = (content) => {
-    return DOMPurify.sanitize(content, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+  const handleCleanContent = (pastedContent) => {
+    const element = document.createElement("html");
+    element.innerHTML = pastedContent;
+    return element.innerText || element.textContent || "";
   };
+
+  //detection the source content
+  const detectContentSource = (pastedContent) => {
+    if (
+      pastedContent.includes("mso-cellspacing") ||
+      pastedContent.includes("<table")
+    ) {
+      return "Excel";
+    }
+
+    if (pastedContent.includes("mso-") || pastedContent.includes("MsoNormal")) {
+      return "MS Office";
+    }
+
+    return null;
+  };
+
   return (
     <div>
       <Editor
-
-      //the add api for .env file
+        //the add api for .env file
         apiKey={import.meta.env.VITE_TinyMCE_API}
+        value={content}
         init={{
           height: 600,
           menubar: false,
           plugins: [
+            "paste",
             "advlist",
             "autolink",
             "lists",
@@ -56,64 +63,36 @@ const MyEditor = () => {
             "alignright alignjustify | bullist numlist outdent indent | " +
             "removeformat | help",
 
-          paste_data_images: true,
-          statusbar:false,
+          statusbar: false,
 
           paste_preprocess: function (plugins, args) {
-            const content = args.content;
+            const pastedContent = args.content;
+            const contentSource = detectContentSource(pastedContent);
 
-            //check the fragment
-            if (content.includes("<!--StartFragment-->")) {
-              alert("the content form MS Office/Google Docs Detected");
+            //check the source of content
+            if (contentSource) {
+              alert(`Content From ${contentSource} Detected`);
               const keepFormatting = window.confirm(
-                "Do You want to keep the formation?"
+                `Do you want to keep the original formatting from ${contentSource}?`
               );
-
               if (!keepFormatting) {
-                args.content = handleCleanContent(content);
+                args.content = handleCleanContent(pastedContent);
               }
 
-              //check the data:image 
-            } else if (content.includes("data:image/")) {
-              alert("content from google docs detected");
-              const keepFormatting = window.confirm(
-                "Do You want to keep the formation?"
-              );
-
-              if (!keepFormatting) {
-                args.content = handleCleanContent(content);
-              }
-
-              //check the excel file content
-            } else if (
-              content.includes("<table") &&
-              content.includes("mso-cellspacing")
-            ) {
-              alert("content from Excel detected");
-              const keepFormatting = window.confirm(
-                "Do You want to keep the formation?"
-              );
-
-              //the handle clean function
-              if (!keepFormatting) {
-                args.content = handleCleanContent(content);
-              }
-
-            // the basic formatting
+              //otherwise basic formatting
             } else {
               const keepFormatting = window.confirm(
-                "Do you want basic formatting?"
+                "Do you want to keep basic format?"
               );
               if (!keepFormatting) {
-                args.content = handleSanitizeWithFormatting(content);
+                args.content = handleCleanContent(pastedContent);
               }
             }
           },
-          paste_postprocess: function (plugins, args) {
-            console.log("After Posted Processing");
-          },
         }}
-        onEditorChange={handleEditorChange}
+        onEditorChange={(newContent) => {
+          setContent(newContent);
+        }}
       ></Editor>
     </div>
   );
