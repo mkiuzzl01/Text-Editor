@@ -2,6 +2,7 @@
 
 ## Overview :
 The extension will enable users to seamlessly paste content from various sources, such as Microsoft Office, Google Docs, and Excel.
+
  Key features:
  
   Source Detection: The extension will intelligently detect the source of the pasted content and present a warning message to the user.
